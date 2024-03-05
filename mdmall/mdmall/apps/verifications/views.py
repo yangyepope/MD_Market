@@ -1,13 +1,13 @@
-from random import random, randint
+from random import randint
 
-from django.shortcuts import render
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django_redis import get_redis_connection
 
 from mdmall.apps.verifications import constans
-from mdmall.libs.aliyunSMS import AliyunSMS
+from celery_tasks.sms.aliyun_sms.aliyunSMS import AliyunSMS
+from celery_tasks.sms.tasks import send_sms_code
 import logging
 
 logger = logging.getLogger('django')
@@ -42,8 +42,11 @@ class SMSCodeView(APIView):
         pl.execute()
 
         # 7. 利用阿里云发送短信验证码
-        aliyun = AliyunSMS()
-        aliyun.send_sms_request(mobile, sms_code)
+        # aliyun = AliyunSMS()
+        # aliyun.send_sms_request(mobile, sms_code)
+
+        # 触发异步任务,将异步任务添加到celery任务队列
+        send_sms_code.delay(mobile, sms_code)
 
         # 8. 响应
         return Response({'code': 'OK'})
