@@ -20,5 +20,8 @@ from django.urls import path, include, re_path
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    re_path(r'^', include('verifications.urls'))
+    re_path(r'^', include('verifications.urls')),
+
+    # 用户模块
+    path('api/users/', include('users.urls'))
 ]
